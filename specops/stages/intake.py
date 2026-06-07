@@ -106,7 +106,7 @@ def parse_spec_file(file_path: str | Path) -> SpecModel:
 def _parse_json(file_path: Path) -> dict[str, Any]:
     """Parse JSON file."""
     with open(file_path, encoding="utf-8") as f:
-        return json.load(f)
+        return json.load(f)  # type: ignore[no-any-return]
 
 
 def _parse_yaml(file_path: Path) -> dict[str, Any]:

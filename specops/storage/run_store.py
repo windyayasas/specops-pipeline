@@ -49,7 +49,7 @@ class RunStore:
         with open(state_file, encoding="utf-8") as f:
             state = json.load(f)
         logger.info("run_state_loaded", file=str(state_file))
-        return state
+        return state  # type: ignore[no-any-return]
 
     def save_run_metadata(self, run_id: str, metadata: dict[str, Any]) -> None:
         """
@@ -83,7 +83,7 @@ class RunStore:
         with open(run_file, encoding="utf-8") as f:
             data = json.load(f)
         logger.info("run_metadata_loaded", file=str(run_file))
-        return data
+        return data  # type: ignore[no-any-return]
 
     def save_artifact(self, name: str, content: str | bytes) -> Path:
         """

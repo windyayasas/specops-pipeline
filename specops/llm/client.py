@@ -4,7 +4,7 @@ import hashlib
 import json
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import structlog
 from groq import Groq, RateLimitError
@@ -123,7 +123,7 @@ class GroqClient:
                     model=self.model,
                     prompt_hash=prompt_hash,
                 )
-                return cached_response
+                return cast(str, cached_response)
 
         messages: list[dict[str, str]] = []
 
@@ -145,13 +145,13 @@ class GroqClient:
             try:
                 response = self.client.chat.completions.create(
                     model=self.model,
-                    messages=messages,
+                    messages=messages,  # type: ignore[arg-type]
                     temperature=temperature,
                     max_tokens=max_tokens,
                 )
 
-                result = response.choices[0].message.content
-                if result is None:
+                result = cast(str, response.choices[0].message.content)
+                if not result:
                     raise RuntimeError("Empty response from Groq")
 
                 logger.info(
@@ -238,7 +238,7 @@ class GroqClient:
                 if cleaned.endswith("```"):
                     cleaned = cleaned[:-3].rstrip()
 
-            return json.loads(cleaned)
+            return json.loads(cleaned)  # type: ignore[no-any-return]
         except json.JSONDecodeError as e:
             logger.error(
                 "groq_json_parse_error",

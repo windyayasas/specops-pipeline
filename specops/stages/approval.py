@@ -12,7 +12,7 @@ logger = structlog.get_logger(__name__)
 class ApprovalCheckpoint:
     """Approval checkpoint with user confirmation."""
 
-    def __init__(self, checkpoint_id: str, description: str):
+    def __init__(self, checkpoint_id: str, description: str) -> None:
         """
         Initialize checkpoint.
 
@@ -67,7 +67,7 @@ class ApprovalCheckpoint:
 class ApprovalManager:
     """Manages approval workflow for pipeline."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize manager."""
         self.approvals: dict[str, bool] = {}
         self.checkpoints: dict[str, ApprovalCheckpoint] = {}

@@ -65,16 +65,18 @@ def setup_logging(
     )
 
     # Configure structlog
+    # Complex type signature from structlog incompatible with mypy strict mode
+    processors: list[Any] = [
+        _add_run_id,  # Always add run_id if available
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.add_log_level,
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.format_exc_info,
+        structlog.processors.UnicodeDecoder(),
+        (structlog.processors.JSONRenderer() if json_format else _dev_renderer),
+    ]
     structlog.configure(
-        processors=[
-            _add_run_id,  # Always add run_id if available
-            structlog.processors.TimeStamper(fmt="iso"),
-            structlog.processors.add_log_level,
-            structlog.processors.StackInfoRenderer(),
-            structlog.processors.format_exc_info,
-            structlog.processors.UnicodeDecoder(),
-            structlog.processors.JSONRenderer() if json_format else _dev_renderer,
-        ],
+        processors=processors,
         context_class=dict,
         logger_factory=structlog.PrintLoggerFactory(),
         cache_logger_on_first_use=True,
@@ -113,4 +115,4 @@ def get_logger(name: str) -> structlog.BoundLogger:
     Returns:
         Structlog BoundLogger instance
     """
-    return structlog.get_logger(name)
+    return structlog.get_logger(name)  # type: ignore[no-any-return]

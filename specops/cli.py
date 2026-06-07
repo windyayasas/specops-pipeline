@@ -216,7 +216,7 @@ def status(
 
 @app.command()
 def list_runs(
-    output_base: str | None = typer.Option(
+    output_base: str = typer.Option(
         "outputs",
         "--output-dir",
         "-o",

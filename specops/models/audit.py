@@ -32,7 +32,7 @@ class AuditEvent(BaseModel):
         ...,
         description="Outcome status (success, failure, pending, approved, rejected)",
     )
-    details: dict = Field(
+    details: dict[str, Any] = Field(
         default_factory=dict,
         description="Event-specific metadata (prompt_hash, iteration, feedback, etc.)",
     )

@@ -175,7 +175,7 @@ def get_run_status(run_id: str) -> RunStatus:
 
 
 @app.post("/runs/{run_id}/approve")
-def approve_run(run_id: str, checkpoint: int = Query(1, ge=1, le=2)) -> dict[str, str]:
+def approve_run(run_id: str, checkpoint: int = Query(1, ge=1, le=2)) -> dict[str, str | bool]:
     """
     Approve a pipeline run at a checkpoint.
 
