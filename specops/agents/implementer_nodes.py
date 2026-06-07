@@ -1,6 +1,7 @@
 """Implementer agent nodes: proposer, reviewer, refiner."""
 
 import json
+import re
 from typing import Any
 
 import structlog
@@ -15,6 +16,32 @@ from specops.llm.prompts import (
 )
 
 logger = structlog.get_logger(__name__)
+
+
+def extract_code_from_markdown(text: str, language: str = "python") -> str:
+    """
+    Extract code from markdown code blocks.
+    
+    Handles:
+    - ```python ... ```
+    - ```{language} ... ```
+    - ``` ... ```
+    
+    Args:
+        text: Text potentially containing markdown code blocks
+        language: Code language to look for (default: python)
+        
+    Returns:
+        Extracted code or original text if no blocks found
+    """
+    # Try to extract from ```python ... ``` blocks
+    pattern = rf"```(?:{language})?\n(.*?)\n```"
+    match = re.search(pattern, text, re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    
+    # If no markdown blocks, return as-is
+    return text.strip()
 
 
 def proposer_node(state: ImplementerState) -> ImplementerState:
@@ -52,12 +79,14 @@ def proposer_node(state: ImplementerState) -> ImplementerState:
 
     # Call LLM to generate code
     try:
-        code = client.call(
+        code_response = client.call(
             prompt=prompt,
             system_prompt="You are an expert Python engineer. Write clean, production-quality code with type hints and docstrings.",
             temperature=0.7,
             max_tokens=4096,
         )
+        # Extract code from markdown if wrapped
+        code = extract_code_from_markdown(code_response)
     except RuntimeError as e:
         logger.error("proposer_llm_call_failed", iteration=iteration, error=str(e))
         raise

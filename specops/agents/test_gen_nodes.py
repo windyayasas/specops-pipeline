@@ -1,6 +1,7 @@
 """Test generation agent nodes: test_proposer and test_validator."""
 
 import json
+import re
 from typing import Any
 
 import structlog
@@ -14,6 +15,32 @@ from specops.llm.prompts import (
 )
 
 logger = structlog.get_logger(__name__)
+
+
+def extract_code_from_markdown(text: str, language: str = "python") -> str:
+    """
+    Extract code from markdown code blocks.
+    
+    Handles:
+    - ```python ... ```
+    - ```{language} ... ```
+    - ``` ... ```
+    
+    Args:
+        text: Text potentially containing markdown code blocks
+        language: Code language to look for (default: python)
+        
+    Returns:
+        Extracted code or original text if no blocks found
+    """
+    # Try to extract from ```python ... ``` blocks
+    pattern = rf"```(?:{language})?\n(.*?)\n```"
+    match = re.search(pattern, text, re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    
+    # If no markdown blocks, return as-is
+    return text.strip()
 
 
 def test_proposer_node(state: TestGenState) -> TestGenState:
@@ -45,12 +72,14 @@ def test_proposer_node(state: TestGenState) -> TestGenState:
 
     # Call LLM to generate tests
     try:
-        tests = client.call(
+        tests_response = client.call(
             prompt=prompt,
             system_prompt="You are an expert test engineer. Write comprehensive pytest tests with good coverage.",
             temperature=0.6,
             max_tokens=4096,
         )
+        # Extract tests from markdown if wrapped
+        tests = extract_code_from_markdown(tests_response)
     except RuntimeError as e:
         logger.error("test_proposer_llm_call_failed", iteration=iteration, error=str(e))
         raise

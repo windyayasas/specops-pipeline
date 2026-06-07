@@ -167,7 +167,19 @@ class GroqClient:
         )
 
         try:
-            return json.loads(response_text)
+            # Strip markdown code blocks if present (```json ... ```)
+            cleaned = response_text.strip()
+            if cleaned.startswith("```"):
+                # Remove opening ``` or ```json
+                if cleaned.startswith("```json"):
+                    cleaned = cleaned[7:].lstrip()
+                else:
+                    cleaned = cleaned[3:].lstrip()
+                # Remove closing ```
+                if cleaned.endswith("```"):
+                    cleaned = cleaned[:-3].rstrip()
+            
+            return json.loads(cleaned)
         except json.JSONDecodeError as e:
             logger.error(
                 "groq_json_parse_error",
