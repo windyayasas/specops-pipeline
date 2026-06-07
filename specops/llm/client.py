@@ -178,7 +178,7 @@ class GroqClient:
                 # Remove closing ```
                 if cleaned.endswith("```"):
                     cleaned = cleaned[:-3].rstrip()
-            
+
             return json.loads(cleaned)
         except json.JSONDecodeError as e:
             logger.error(

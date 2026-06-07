@@ -1,5 +1,7 @@
 """Pydantic models for specification validation."""
 
+from typing import Any, ClassVar
+
 from pydantic import BaseModel, Field
 
 
@@ -28,7 +30,7 @@ class SpecModel(BaseModel):
     class Config:
         """Pydantic config."""
 
-        json_schema_extra = {
+        json_schema_extra: ClassVar[dict[str, Any]] = {
             "example": {
                 "feature_objective": "Implement health check endpoint",
                 "user_story": "As a DevOps engineer...",

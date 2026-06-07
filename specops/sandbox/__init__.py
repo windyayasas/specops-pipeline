@@ -1,3 +1,3 @@
 """Sandbox package."""
 
-__all__ = ["validate_path", "sanitize_path"]
+__all__ = ["sanitize_path", "validate_path"]

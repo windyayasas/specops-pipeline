@@ -1,5 +1,7 @@
 """Audit trail models for compliance and traceability."""
 
+from typing import Any, ClassVar
+
 from pydantic import BaseModel, Field
 
 
@@ -38,7 +40,7 @@ class AuditEvent(BaseModel):
     class Config:
         """Pydantic config."""
 
-        json_schema_extra = {
+        json_schema_extra: ClassVar[dict[str, Any]] = {
             "example": {
                 "timestamp": "2024-01-15T10:30:45Z",
                 "run_id": "run_abc123",

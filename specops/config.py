@@ -1,6 +1,5 @@
 """Configuration management for SpecOps Pipeline."""
 
-from typing import Any
 
 from pydantic_settings import BaseSettings
 

@@ -1,13 +1,9 @@
 """CLI interface for SpecOps Pipeline using Typer."""
 
-import sys
 from pathlib import Path
-from typing import Optional
 
-import structlog
 import typer
 
-from specops.models.spec import SpecModel
 from specops.observability.logging import bind_run_id, get_logger, setup_logging
 from specops.stages.approval import ApprovalManager
 from specops.stages.implementer_agent import run_implementer_workflow
@@ -36,7 +32,7 @@ def run(
         ...,
         help="Path to spec file (JSON, YAML, or Markdown with YAML frontmatter)",
     ),
-    output_dir: Optional[str] = typer.Option(
+    output_dir: str | None = typer.Option(
         None,
         "--output-dir",
         "-o",
@@ -47,7 +43,7 @@ def run(
         "--skip-approval",
         help="Skip approval checkpoints (CI mode)",
     ),
-    run_id: Optional[str] = typer.Option(
+    run_id: str | None = typer.Option(
         None,
         "--run-id",
         help="Custom run ID (default: auto-generated)",
@@ -138,7 +134,7 @@ def run(
             logger.error("cli_quality_gate_failed", error=str(e))
             if not skip_approval:
                 typer.echo(f"\nQuality gate failed: {e}", err=True)
-                raise typer.Exit(code=1)
+                raise typer.Exit(code=1) from None
 
         # Approval checkpoint 2
         if not skip_approval:
@@ -171,13 +167,13 @@ def run(
     except Exception as e:
         logger.error("cli_run_failed", error=str(e), exc_info=True)
         typer.echo(f"\n❌ Pipeline failed: {e}", err=True)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from None
 
 
 @app.command()
 def status(
     run_id: str = typer.Argument(..., help="Run ID to check"),
-    output_dir: Optional[str] = typer.Option(
+    output_dir: str | None = typer.Option(
         None,
         "--output-dir",
         "-o",
@@ -188,10 +184,7 @@ def status(
     setup_app_logging()
 
     try:
-        if output_dir is None:
-            output_dir_path = Path("outputs") / run_id
-        else:
-            output_dir_path = Path(output_dir)
+        output_dir_path = Path("outputs") / run_id if output_dir is None else Path(output_dir)
 
         store = RunStore(output_dir_path)
         state = store.load_state()
@@ -205,24 +198,24 @@ def status(
 
         if "plan" in state:
             plan = state["plan"]
-            typer.echo(f"\n📋 Plan:")
+            typer.echo("\n📋 Plan:")
             typer.echo(f"  Tasks: {len(plan.get('tasks', []))}")
             typer.echo(f"  Design: {plan.get('design_summary', '')[:100]}...")
 
         if "code_summary" in state:
-            typer.echo(f"\n💻 Code:")
+            typer.echo("\n💻 Code:")
             typer.echo(f"  Iterations: {state['code_summary'].get('iterations', 0)}")
             typer.echo(f"  Approved: {state['code_summary'].get('approved', False)}")
 
     except Exception as e:
         logger.error("cli_status_failed", error=str(e))
         typer.echo(f"\n❌ Status check failed: {e}", err=True)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from None
 
 
 @app.command()
 def list_runs(
-    output_base: Optional[str] = typer.Option(
+    output_base: str | None = typer.Option(
         "outputs",
         "--output-dir",
         "-o",
@@ -256,7 +249,7 @@ def list_runs(
     except Exception as e:
         logger.error("cli_list_runs_failed", error=str(e))
         typer.echo(f"\n❌ List failed: {e}", err=True)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from None
 
 
 if __name__ == "__main__":

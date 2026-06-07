@@ -7,13 +7,13 @@ from pathlib import Path
 from typing import Any
 
 import structlog
-from langgraph.graph import StateGraph, END
+from langgraph.graph import END, StateGraph
 
+from specops.agents.state_graphs import TestGenState
 from specops.agents.test_gen_nodes import (
     test_proposer_node,
     test_validator_node,
 )
-from specops.agents.state_graphs import TestGenState
 from specops.config import get_settings
 from specops.models.spec import SpecModel
 
@@ -88,10 +88,7 @@ def run_test_gen_workflow(
     if run_id is None:
         run_id = f"run_{uuid.uuid4().hex[:8]}"
 
-    if output_dir is None:
-        output_dir = Path("outputs") / run_id
-    else:
-        output_dir = Path(output_dir)
+    output_dir = Path("outputs") / run_id if output_dir is None else Path(output_dir)
 
     # Create output directory
     tests_dir = output_dir / "tests"

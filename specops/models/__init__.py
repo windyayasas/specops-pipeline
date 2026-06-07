@@ -1,3 +1,3 @@
 """Models package."""
 
-__all__ = ["SpecModel", "PlanOutput", "RunState", "AuditEvent"]
+__all__ = ["AuditEvent", "PlanOutput", "RunState", "SpecModel"]

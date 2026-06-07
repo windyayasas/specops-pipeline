@@ -1,6 +1,5 @@
 """Tests for sandbox path validation."""
 
-import pytest
 
 from specops.sandbox.path_validator import sanitize_path, validate_path
 

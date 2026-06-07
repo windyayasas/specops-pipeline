@@ -46,7 +46,7 @@ class RunStore:
         if not state_file.exists():
             return None
 
-        with open(state_file, "r", encoding="utf-8") as f:
+        with open(state_file, encoding="utf-8") as f:
             state = json.load(f)
         logger.info("run_state_loaded", file=str(state_file))
         return state
@@ -80,7 +80,7 @@ class RunStore:
         if not run_file.exists():
             return None
 
-        with open(run_file, "r", encoding="utf-8") as f:
+        with open(run_file, encoding="utf-8") as f:
             data = json.load(f)
         logger.info("run_metadata_loaded", file=str(run_file))
         return data
@@ -123,5 +123,5 @@ class RunStore:
         if not artifact_path.exists():
             return None
 
-        with open(artifact_path, "r", encoding="utf-8") as f:
+        with open(artifact_path, encoding="utf-8") as f:
             return f.read()

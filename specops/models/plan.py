@@ -1,5 +1,7 @@
 """Plan and run state models."""
 
+from typing import Any, ClassVar
+
 from pydantic import BaseModel, Field
 
 
@@ -54,7 +56,7 @@ class RunState(BaseModel):
     class Config:
         """Pydantic config."""
 
-        json_schema_extra = {
+        json_schema_extra: ClassVar[dict[str, Any]] = {
             "example": {
                 "status": "PLAN_APPROVED",
                 "created_at": "2024-01-15T10:30:00Z",

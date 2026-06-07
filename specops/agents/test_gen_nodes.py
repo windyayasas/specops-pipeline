@@ -1,8 +1,6 @@
 """Test generation agent nodes: test_proposer and test_validator."""
 
-import json
 import re
-from typing import Any
 
 import structlog
 
@@ -20,16 +18,16 @@ logger = structlog.get_logger(__name__)
 def extract_code_from_markdown(text: str, language: str = "python") -> str:
     """
     Extract code from markdown code blocks.
-    
+
     Handles:
     - ```python ... ```
     - ```{language} ... ```
     - ``` ... ```
-    
+
     Args:
         text: Text potentially containing markdown code blocks
         language: Code language to look for (default: python)
-        
+
     Returns:
         Extracted code or original text if no blocks found
     """
@@ -38,7 +36,7 @@ def extract_code_from_markdown(text: str, language: str = "python") -> str:
     match = re.search(pattern, text, re.DOTALL)
     if match:
         return match.group(1).strip()
-    
+
     # If no markdown blocks, return as-is
     return text.strip()
 

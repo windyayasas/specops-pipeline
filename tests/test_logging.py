@@ -1,7 +1,5 @@
 """Tests for observability logging."""
 
-import pytest
-import structlog
 
 from specops.observability.logging import (
     bind_run_id,

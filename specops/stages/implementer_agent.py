@@ -7,12 +7,12 @@ from pathlib import Path
 from typing import Any
 
 import structlog
-from langgraph.graph import StateGraph, END
+from langgraph.graph import END, StateGraph
 
 from specops.agents.implementer_nodes import (
     proposer_node,
-    reviewer_node,
     refiner_node,
+    reviewer_node,
 )
 from specops.agents.state_graphs import ImplementerState
 from specops.config import get_settings
@@ -108,10 +108,7 @@ def run_implementer_workflow(
     if run_id is None:
         run_id = f"run_{uuid.uuid4().hex[:8]}"
 
-    if output_dir is None:
-        output_dir = Path("outputs") / run_id
-    else:
-        output_dir = Path(output_dir)
+    output_dir = Path("outputs") / run_id if output_dir is None else Path(output_dir)
 
     # Create output directory
     src_dir = output_dir / "src"

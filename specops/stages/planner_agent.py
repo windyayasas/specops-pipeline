@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import structlog
-from langgraph.graph import StateGraph, END
+from langgraph.graph import END, StateGraph
 
 from specops.agents.planner_node import planner_node
 from specops.agents.state_graphs import PlannerState
@@ -57,10 +57,7 @@ def run_planner_workflow(
     if run_id is None:
         run_id = f"run_{uuid.uuid4().hex[:8]}"
 
-    if output_dir is None:
-        output_dir = Path("outputs") / run_id
-    else:
-        output_dir = Path(output_dir)
+    output_dir = Path("outputs") / run_id if output_dir is None else Path(output_dir)
 
     # Create output directory
     output_dir.mkdir(parents=True, exist_ok=True)

@@ -3,13 +3,12 @@
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import structlog
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 
-from specops.models.spec import SpecModel
 from specops.observability.logging import bind_run_id, setup_logging
 from specops.stages.implementer_agent import run_implementer_workflow
 from specops.stages.intake import parse_spec_file
@@ -35,7 +34,7 @@ class RunRequest(BaseModel):
     spec_file: str
     """Path to spec file"""
 
-    run_id: Optional[str] = None
+    run_id: str | None = None
     """Custom run ID (auto-generated if not provided)"""
 
     auto_approve: bool = False
@@ -55,10 +54,10 @@ class RunStatus(BaseModel):
 
     run_id: str
     status: str
-    created_at: Optional[str] = None
-    updated_at: Optional[str] = None
-    plan: Optional[dict[str, Any]] = None
-    code_summary: Optional[dict[str, Any]] = None
+    created_at: str | None = None
+    updated_at: str | None = None
+    plan: dict[str, Any] | None = None
+    code_summary: dict[str, Any] | None = None
 
 
 @app.get("/health")
@@ -135,7 +134,7 @@ def create_run(request: RunRequest) -> RunResponse:
 
     except Exception as e:
         logger.error("api_run_failed", error=str(e), exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Run failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Run failed: {e!s}") from e
 
 
 @app.get("/runs/{run_id}", response_model=RunStatus)
@@ -172,7 +171,7 @@ def get_run_status(run_id: str) -> RunStatus:
         raise
     except Exception as e:
         logger.error("api_get_run_status_failed", run_id=run_id, error=str(e))
-        raise HTTPException(status_code=500, detail=f"Status retrieval failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Status retrieval failed: {e!s}") from e
 
 
 @app.post("/runs/{run_id}/approve")
@@ -217,7 +216,7 @@ def approve_run(run_id: str, checkpoint: int = Query(1, ge=1, le=2)) -> dict[str
         raise
     except Exception as e:
         logger.error("api_approve_run_failed", run_id=run_id, error=str(e))
-        raise HTTPException(status_code=500, detail=f"Approval failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Approval failed: {e!s}") from e
 
 
 @app.get("/runs/{run_id}/audit")
@@ -242,7 +241,7 @@ def get_run_audit(run_id: str) -> dict[str, Any]:
         import json
 
         events = []
-        with open(audit_file, "r", encoding="utf-8") as f:
+        with open(audit_file, encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if line:
@@ -254,7 +253,7 @@ def get_run_audit(run_id: str) -> dict[str, Any]:
 
     except Exception as e:
         logger.error("api_get_audit_failed", run_id=run_id, error=str(e))
-        raise HTTPException(status_code=500, detail=f"Audit retrieval failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Audit retrieval failed: {e!s}") from e
 
 
 @app.get("/runs", response_model=dict[str, list[str]])
@@ -278,4 +277,4 @@ def list_runs() -> dict[str, list[str]]:
 
     except Exception as e:
         logger.error("api_list_runs_failed", error=str(e))
-        raise HTTPException(status_code=500, detail=f"List failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"List failed: {e!s}") from e

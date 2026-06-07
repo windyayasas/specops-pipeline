@@ -14,7 +14,6 @@ logger = structlog.get_logger(__name__)
 class QualityGateError(Exception):
     """Raised when quality gate check fails."""
 
-    pass
 
 
 def run_quality_gate(
@@ -64,7 +63,7 @@ def run_quality_gate(
     except Exception as e:
         logger.error("quality_gate_ruff_error", error=str(e))
         report["passed"] = False
-        report["errors"].append(f"Ruff error: {str(e)}")
+        report["errors"].append(f"Ruff error: {e!s}")
 
     # 2. Mypy check (type checking)
     logger.info("quality_gate_mypy_starting")
@@ -80,7 +79,7 @@ def run_quality_gate(
     except Exception as e:
         logger.error("quality_gate_mypy_error", error=str(e))
         report["passed"] = False
-        report["errors"].append(f"Mypy error: {str(e)}")
+        report["errors"].append(f"Mypy error: {e!s}")
 
     # 3. Pytest (unit and integration tests)
     if test_path and test_path.exists():
@@ -97,7 +96,7 @@ def run_quality_gate(
         except Exception as e:
             logger.error("quality_gate_pytest_error", error=str(e))
             report["passed"] = False
-            report["errors"].append(f"Pytest error: {str(e)}")
+            report["errors"].append(f"Pytest error: {e!s}")
     else:
         report["results"]["pytest"] = {"skipped": True, "reason": "No test path provided"}
         logger.info("quality_gate_pytest_skipped")
@@ -116,7 +115,7 @@ def run_quality_gate(
     except Exception as e:
         logger.error("quality_gate_bandit_error", error=str(e))
         report["passed"] = False
-        report["errors"].append(f"Bandit error: {str(e)}")
+        report["errors"].append(f"Bandit error: {e!s}")
 
     # Write report
     if output_file:

@@ -1,3 +1,3 @@
 """Observability package."""
 
-__all__ = ["setup_logging", "get_logger", "bind_run_id"]
+__all__ = ["bind_run_id", "get_logger", "setup_logging"]

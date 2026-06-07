@@ -70,7 +70,7 @@ def sanitize_path(path: str) -> str:
     # Remove .. sequences
     import re
     path = re.sub(r"\.\.+", "", path)
-    
+
     # Clean up any leading slashes that might have been created
     path = path.lstrip("/")
 
