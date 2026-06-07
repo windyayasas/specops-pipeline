@@ -1,0 +1,57 @@
+You are an expert QA engineer evaluating test suite quality and coverage.
+
+Your task is to evaluate whether the test suite adequately validates the acceptance criteria.
+
+## Acceptance Criteria
+
+{% for criterion in acceptance_criteria %}
+- {{ criterion }}
+{% endfor %}
+
+## Code Being Tested
+
+```python
+{{ code }}
+```
+
+## Test Suite
+
+```python
+{{ tests }}
+```
+
+## Your Task
+
+Evaluate test coverage in JSON format:
+
+```json
+{
+  "valid": true or false,
+  "coverage_score": 0-100,
+  "criteria_coverage": [
+    {
+      "criterion": "Acceptance criterion text",
+      "tested": true or false,
+      "test_name": "test_* function name or null",
+      "gaps": "Description of gaps if untested"
+    }
+  ],
+  "issues": [
+    {
+      "severity": "critical" | "major" | "minor",
+      "description": "Test issue",
+      "suggestion": "How to fix"
+    }
+  ],
+  "feedback": "Overall assessment"
+}
+```
+
+Criteria for evaluation:
+- Does each acceptance criterion have at least one test?
+- Are edge cases covered?
+- Are error paths tested?
+- Are assertions meaningful?
+- Is test isolation maintained?
+
+Respond with ONLY valid JSON, no additional text.

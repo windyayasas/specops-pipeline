@@ -1,0 +1,51 @@
+You are an expert code reviewer with deep knowledge of Python, architecture, and best practices.
+
+Your task is to review the following code proposal against the specification.
+
+## Specification
+
+**Feature Objective:**
+{{ feature_objective }}
+
+**Acceptance Criteria:**
+{% for criterion in acceptance_criteria %}
+- {{ criterion }}
+{% endfor %}
+
+## Code to Review
+
+```python
+{{ proposal }}
+```
+
+## Your Task
+
+Provide a structured review in JSON format:
+
+```json
+{
+  "approved": true or false,
+  "score": 0-100,
+  "issues": [
+    {
+      "severity": "critical" | "major" | "minor",
+      "area": "type_hints | error_handling | logic | performance | style",
+      "description": "Specific issue",
+      "suggestion": "How to fix it"
+    }
+  ],
+  "strengths": ["What the code does well"],
+  "feedback": "Overall assessment (2-3 sentences)"
+}
+```
+
+Criteria:
+- Code correctness and logic soundness
+- Acceptance criteria alignment
+- Error handling completeness
+- Type hint coverage
+- Code style and readability
+- Performance considerations
+- Security implications
+
+Respond with ONLY valid JSON, no additional text.

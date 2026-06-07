@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  specops-cli:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: specops-pipeline
+    volumes:
+      - ./samples:/app/samples
+      - ./outputs:/app/outputs
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - LOG_LEVEL=INFO
+    working_dir: /app
+
+  specops-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: specops-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./samples:/app/samples
+      - ./outputs:/app/outputs
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - LOG_LEVEL=INFO
+    command: uvicorn specops.api:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - specops-cli

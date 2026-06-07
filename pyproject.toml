@@ -1,0 +1,137 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "specops-pipeline"
+version = "0.1.0"
+description = "Multi-agent AI-native spec-driven development pipeline"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+    { name = "Newton Russell", email = "newton@example.com" }
+]
+
+dependencies = [
+    "langchain>=0.1.0",
+    "langgraph>=0.0.1",
+    "groq>=0.4.0",
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "typer[all]>=0.9.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "structlog>=23.2.0",
+    "python-dotenv>=1.0.0",
+    "jinja2>=3.1.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.1.0",
+    "mypy>=1.6.0",
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.0",
+    "bandit>=1.7.5",
+    "black>=23.0.0",
+]
+
+[project.scripts]
+specops = "specops.cli:app"
+
+[tool.setuptools]
+packages = ["specops"]
+
+[tool.setuptools.package-data]
+specops = ["llm/prompts/*.j2"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = [
+    ".venv",
+    "venv",
+    "__pycache__",
+    "dist",
+    "build",
+    ".egg-info",
+    ".git",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",      # Errors
+    "W",      # Warnings
+    "F",      # Pyflakes (undefined names, unused imports)
+    "I",      # isort (import sorting)
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "A",      # flake8-builtins
+    "C4",     # flake8-comprehensions
+    "B",      # flake8-bugbear
+    "PIE",    # flake8-pie
+    "SIM",    # flake8-simplify
+    "RUF",    # Ruff-specific rules
+]
+ignore = [
+    "E501",   # Line too long (mypy will check this)
+    "W292",   # Blank line at end of file (conflicts with formatters)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["specops"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = "groq.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "langgraph.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "langchain.*"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+addopts = """
+    -v
+    --strict-markers
+    --cov=specops
+    --cov-report=term-missing
+    --cov-report=html
+    --cov-fail-under=60
+"""
+
+[tool.coverage.run]
+branch = true
+source = ["specops"]
+omit = [
+    "*/__init__.py",
+    "*/tests/*",
+    "*/.venv/*",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false

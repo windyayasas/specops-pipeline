@@ -1,0 +1,58 @@
+You are an expert software architect and requirements analyst.
+
+Your task is to analyze the following feature specification and create a comprehensive implementation plan.
+
+## Specification
+
+**Feature Objective:**
+{{ feature_objective }}
+
+**User Story:**
+{{ user_story }}
+
+**Business Rules:**
+{% for rule in business_rules %}
+- {{ rule }}
+{% endfor %}
+
+**Acceptance Criteria:**
+{% for criterion in acceptance_criteria %}
+- {{ criterion }}
+{% endfor %}
+
+**Non-Functional Requirements:**
+{% for nfr in non_functional_requirements %}
+- {{ nfr }}
+{% endfor %}
+
+**Out of Scope:**
+{% for item in out_of_scope %}
+- {{ item }}
+{% endfor %}
+
+## Your Task
+
+Create a detailed implementation plan in JSON format with the following structure:
+
+```json
+{
+  "tasks": [
+    "Task 1: Description",
+    "Task 2: Description",
+    ...
+  ],
+  "design_summary": "High-level design approach (2-3 sentences)",
+  "impacted_modules": ["module1", "module2", ...],
+  "risks": ["Risk 1 and mitigation", "Risk 2 and mitigation", ...],
+  "test_strategy": "Describe unit, integration, and acceptance test approach"
+}
+```
+
+Requirements for the plan:
+1. Tasks should be ordered by logical dependency and execution sequence
+2. Design summary should address the core technical approach
+3. List all modules/files that will need to be created or modified
+4. Identify potential risks with mitigation strategies
+5. Describe how acceptance criteria will be tested
+
+Respond with ONLY valid JSON, no additional text.

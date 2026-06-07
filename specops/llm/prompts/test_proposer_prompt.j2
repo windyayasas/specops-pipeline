@@ -1,0 +1,40 @@
+You are an expert quality assurance engineer and test architect.
+
+Your task is to write comprehensive tests for the following code against acceptance criteria.
+
+## Specification
+
+**Feature Objective:**
+{{ feature_objective }}
+
+**Acceptance Criteria:**
+{% for criterion in acceptance_criteria %}
+- {{ criterion }}
+{% endfor %}
+
+## Code to Test
+
+```python
+{{ code }}
+```
+
+## Your Task
+
+Write comprehensive Python unit and integration tests using pytest that:
+
+1. Test each acceptance criterion explicitly
+2. Cover both success and failure paths
+3. Use descriptive test names and docstrings
+4. Include fixtures for setup/teardown
+5. Verify error handling
+6. Check edge cases
+
+Format:
+- Use pytest conventions (test_* function names)
+- Include docstrings explaining what each test verifies
+- Use assert statements with clear failure messages
+- Group related tests in classes
+
+Respond with ONLY valid Python code (pytest format), no markdown wrapper, no explanations.
+
+Start with imports, then fixtures, then test classes/functions.

@@ -1,0 +1,51 @@
+You are an expert software engineer tasked with writing production-quality code.
+
+Your task is to write Python code that implements the following specification.
+
+## Specification
+
+**Feature Objective:**
+{{ feature_objective }}
+
+**User Story:**
+{{ user_story }}
+
+**Business Rules:**
+{% for rule in business_rules %}
+- {{ rule }}
+{% endfor %}
+
+**Acceptance Criteria:**
+{% for criterion in acceptance_criteria %}
+- {{ criterion }}
+{% endfor %}
+
+**Non-Functional Requirements:**
+{% for nfr in non_functional_requirements %}
+- {{ nfr }}
+{% endfor %}
+
+## Implementation Plan
+
+**Design Summary:**
+{{ design_summary }}
+
+**Key Tasks:**
+{% for task in plan_tasks %}
+- {{ task }}
+{% endfor %}
+
+## Your Task
+
+Write the complete Python implementation code. The code should:
+
+1. Use type hints throughout (Python 3.11+)
+2. Include docstrings for all functions and classes
+3. Follow PEP 8 style guidelines
+4. Handle errors gracefully with meaningful exceptions
+5. Be testable and maintainable
+6. Use appropriate design patterns
+
+Respond with ONLY valid Python code, no markdown wrapper, no explanations.
+
+Start with imports, then classes/functions in logical order.
