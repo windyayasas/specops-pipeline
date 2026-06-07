@@ -1,6 +1,5 @@
 """Tests for FastAPI endpoints."""
 
-import json
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 

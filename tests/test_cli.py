@@ -103,9 +103,9 @@ class TestRunCommand:
         with (
             patch("specops.cli.parse_spec_file", return_value=mock_spec),
             patch("specops.cli.run_planner_workflow", return_value={"plan": {"tasks": []}}),
-            patch("specops.cli.ApprovalManager") as MockApproval,
+            patch("specops.cli.ApprovalManager") as mock_approval,
         ):
-            mock_mgr = MockApproval.return_value
+            mock_mgr = mock_approval.return_value
             mock_mgr.request_approval.return_value = False
             result = runner.invoke(app, ["run", str(spec_file)])
 

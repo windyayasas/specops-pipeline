@@ -16,7 +16,6 @@ from specops.stages.quality_gate import (
     run_quality_gate,
 )
 
-
 # ---------------------------------------------------------------------------
 # _run_ruff
 # ---------------------------------------------------------------------------
@@ -186,9 +185,8 @@ class TestRunQualityGate:
                 return MagicMock(returncode=1, stdout="E501 error", stderr="")
             return MagicMock(returncode=0, stdout='{"results": []}', stderr="")
 
-        with patch("subprocess.run", side_effect=_side_effect):
-            with pytest.raises(QualityGateError):
-                run_quality_gate(tmp_path / "src")
+        with patch("subprocess.run", side_effect=_side_effect), pytest.raises(QualityGateError):
+            run_quality_gate(tmp_path / "src")
 
     def test_mypy_failure_raises_quality_gate_error(self, tmp_path: Path) -> None:
         def _side_effect(cmd: list[str], **kwargs: object) -> MagicMock:
@@ -196,9 +194,8 @@ class TestRunQualityGate:
                 return MagicMock(returncode=1, stdout="type error", stderr="")
             return MagicMock(returncode=0, stdout='{"results": []}', stderr="")
 
-        with patch("subprocess.run", side_effect=_side_effect):
-            with pytest.raises(QualityGateError):
-                run_quality_gate(tmp_path / "src")
+        with patch("subprocess.run", side_effect=_side_effect), pytest.raises(QualityGateError):
+            run_quality_gate(tmp_path / "src")
 
     def test_writes_output_file(self, tmp_path: Path) -> None:
         output_file = tmp_path / "quality_report.json"
@@ -243,9 +240,8 @@ class TestRunQualityGate:
                 return MagicMock(returncode=1, stdout=json.dumps({"results": issues}), stderr="")
             return MagicMock(returncode=0, stdout='{"results": []}', stderr="")
 
-        with patch("subprocess.run", side_effect=_side_effect):
-            with pytest.raises(QualityGateError):
-                run_quality_gate(tmp_path / "src")
+        with patch("subprocess.run", side_effect=_side_effect), pytest.raises(QualityGateError):
+            run_quality_gate(tmp_path / "src")
 
     def test_report_contains_timestamp(self, tmp_path: Path) -> None:
         with patch("subprocess.run") as mock_run:

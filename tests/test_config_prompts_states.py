@@ -1,11 +1,7 @@
 """Tests for configuration, prompt templates, and state type definitions."""
 
 import os
-from typing import Any
 from unittest.mock import patch
-
-import pytest
-
 
 # ---------------------------------------------------------------------------
 # Config / Settings

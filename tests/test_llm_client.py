@@ -1,13 +1,11 @@
 """Tests for LLM client and response cache."""
 
-import json
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from specops.llm.client import GroqClient, LLMCache
-
 
 # ---------------------------------------------------------------------------
 # LLMCache
@@ -89,10 +87,10 @@ class TestGroqClient:
         assert c.hash_prompt("abc") != c.hash_prompt("xyz")
 
     def test_call_returns_response_text(self) -> None:
-        with patch("specops.llm.client.Groq") as MockGroq:
+        with patch("specops.llm.client.Groq") as mock_groq:
             mock_resp = MagicMock()
             mock_resp.choices[0].message.content = "Hello from LLM!"
-            MockGroq.return_value.chat.completions.create.return_value = mock_resp
+            mock_groq.return_value.chat.completions.create.return_value = mock_resp
 
             c = GroqClient(api_key="test-key", enable_cache=False)
             result = c.call("say hello")
@@ -100,7 +98,7 @@ class TestGroqClient:
         assert result == "Hello from LLM!"
 
     def test_call_uses_cached_response(self) -> None:
-        with patch("specops.llm.client.Groq") as MockGroq:
+        with patch("specops.llm.client.Groq") as mock_groq:
             mock_cache = MagicMock()
             mock_cache.get_cache_key.return_value = "cached_key"
             mock_cache.get.return_value = "from cache"
@@ -110,13 +108,13 @@ class TestGroqClient:
             result = c.call("test prompt")
 
         assert result == "from cache"
-        MockGroq.return_value.chat.completions.create.assert_not_called()
+        mock_groq.return_value.chat.completions.create.assert_not_called()
 
     def test_call_stores_response_in_cache(self) -> None:
-        with patch("specops.llm.client.Groq") as MockGroq:
+        with patch("specops.llm.client.Groq") as mock_groq:
             mock_resp = MagicMock()
             mock_resp.choices[0].message.content = "fresh response"
-            MockGroq.return_value.chat.completions.create.return_value = mock_resp
+            mock_groq.return_value.chat.completions.create.return_value = mock_resp
 
             mock_cache = MagicMock()
             mock_cache.get_cache_key.return_value = "some_key"
@@ -130,15 +128,15 @@ class TestGroqClient:
         mock_cache.set.assert_called_once_with("some_key", "fresh response")
 
     def test_call_with_system_prompt_includes_both_messages(self) -> None:
-        with patch("specops.llm.client.Groq") as MockGroq:
+        with patch("specops.llm.client.Groq") as mock_groq:
             mock_resp = MagicMock()
             mock_resp.choices[0].message.content = "answer"
-            MockGroq.return_value.chat.completions.create.return_value = mock_resp
+            mock_groq.return_value.chat.completions.create.return_value = mock_resp
 
             c = GroqClient(api_key="test-key", enable_cache=False)
             c.call("user question", system_prompt="you are an expert")
 
-        call_kwargs = MockGroq.return_value.chat.completions.create.call_args[1]
+        call_kwargs = mock_groq.return_value.chat.completions.create.call_args[1]
         messages = call_kwargs["messages"]
         assert messages[0]["role"] == "system"
         assert messages[0]["content"] == "you are an expert"
@@ -148,14 +146,14 @@ class TestGroqClient:
         import httpx
         from groq import RateLimitError
 
-        with patch("specops.llm.client.Groq") as MockGroq, patch("specops.llm.client.time.sleep"):
+        with patch("specops.llm.client.Groq") as mock_groq, patch("specops.llm.client.time.sleep"):
             mock_resp = MagicMock()
             mock_resp.choices[0].message.content = "ok after retry"
 
             fake_http_resp = MagicMock(spec=httpx.Response)
             fake_http_resp.status_code = 429
 
-            MockGroq.return_value.chat.completions.create.side_effect = [
+            mock_groq.return_value.chat.completions.create.side_effect = [
                 RateLimitError("rate limited", response=fake_http_resp, body=None),
                 mock_resp,
             ]
@@ -169,11 +167,11 @@ class TestGroqClient:
         import httpx
         from groq import RateLimitError
 
-        with patch("specops.llm.client.Groq") as MockGroq, patch("specops.llm.client.time.sleep"):
+        with patch("specops.llm.client.Groq") as mock_groq, patch("specops.llm.client.time.sleep"):
             fake_http_resp = MagicMock(spec=httpx.Response)
             fake_http_resp.status_code = 429
 
-            MockGroq.return_value.chat.completions.create.side_effect = RateLimitError(
+            mock_groq.return_value.chat.completions.create.side_effect = RateLimitError(
                 "rate limited", response=fake_http_resp, body=None
             )
 
@@ -182,20 +180,20 @@ class TestGroqClient:
                 c.call("prompt")
 
     def test_call_raises_on_empty_response(self) -> None:
-        with patch("specops.llm.client.Groq") as MockGroq:
+        with patch("specops.llm.client.Groq") as mock_groq:
             mock_resp = MagicMock()
             mock_resp.choices[0].message.content = None
-            MockGroq.return_value.chat.completions.create.return_value = mock_resp
+            mock_groq.return_value.chat.completions.create.return_value = mock_resp
 
             c = GroqClient(api_key="test-key", enable_cache=False, max_retries=1)
             with pytest.raises(RuntimeError):
                 c.call("prompt")
 
     def test_json_call_parses_valid_json(self) -> None:
-        with patch("specops.llm.client.Groq") as MockGroq:
+        with patch("specops.llm.client.Groq") as mock_groq:
             mock_resp = MagicMock()
             mock_resp.choices[0].message.content = '{"key": "value", "count": 42}'
-            MockGroq.return_value.chat.completions.create.return_value = mock_resp
+            mock_groq.return_value.chat.completions.create.return_value = mock_resp
 
             c = GroqClient(api_key="test-key", enable_cache=False)
             result = c.json_call("return json")
@@ -203,10 +201,10 @@ class TestGroqClient:
         assert result == {"key": "value", "count": 42}
 
     def test_json_call_strips_markdown_code_block(self) -> None:
-        with patch("specops.llm.client.Groq") as MockGroq:
+        with patch("specops.llm.client.Groq") as mock_groq:
             mock_resp = MagicMock()
             mock_resp.choices[0].message.content = "```json\n{\"x\": 1}\n```"
-            MockGroq.return_value.chat.completions.create.return_value = mock_resp
+            mock_groq.return_value.chat.completions.create.return_value = mock_resp
 
             c = GroqClient(api_key="test-key", enable_cache=False)
             result = c.json_call("return json")
@@ -214,10 +212,10 @@ class TestGroqClient:
         assert result == {"x": 1}
 
     def test_json_call_strips_plain_code_block(self) -> None:
-        with patch("specops.llm.client.Groq") as MockGroq:
+        with patch("specops.llm.client.Groq") as mock_groq:
             mock_resp = MagicMock()
             mock_resp.choices[0].message.content = "```\n{\"x\": 2}\n```"
-            MockGroq.return_value.chat.completions.create.return_value = mock_resp
+            mock_groq.return_value.chat.completions.create.return_value = mock_resp
 
             c = GroqClient(api_key="test-key", enable_cache=False)
             result = c.json_call("return json")
@@ -225,10 +223,10 @@ class TestGroqClient:
         assert result == {"x": 2}
 
     def test_json_call_raises_on_invalid_json(self) -> None:
-        with patch("specops.llm.client.Groq") as MockGroq:
+        with patch("specops.llm.client.Groq") as mock_groq:
             mock_resp = MagicMock()
             mock_resp.choices[0].message.content = "this is not json at all"
-            MockGroq.return_value.chat.completions.create.return_value = mock_resp
+            mock_groq.return_value.chat.completions.create.return_value = mock_resp
 
             c = GroqClient(api_key="test-key", enable_cache=False)
             with pytest.raises(ValueError, match="Failed to parse JSON"):
