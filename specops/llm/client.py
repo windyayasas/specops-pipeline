@@ -1,7 +1,9 @@
-"""Groq LLM client wrapper with retry logic."""
+"""Groq LLM client wrapper with retry logic and response caching."""
 
 import hashlib
+import json
 import time
+from pathlib import Path
 from typing import Any
 
 import structlog
@@ -10,14 +12,53 @@ from groq import Groq, RateLimitError
 logger = structlog.get_logger(__name__)
 
 
+class LLMCache:
+    """Simple file-based cache for LLM responses."""
+
+    def __init__(self, cache_dir: Path = Path("outputs/.llm_cache")):
+        """Initialize cache directory."""
+        self.cache_dir = cache_dir
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+
+    def get_cache_key(self, prompt: str, system_prompt: str | None = None) -> str:
+        """Generate cache key from prompt and system prompt."""
+        combined = f"{system_prompt or ''}:::{prompt}"
+        return hashlib.sha256(combined.encode("utf-8")).hexdigest()
+
+    def get(self, cache_key: str) -> Any | None:
+        """Retrieve cached response if exists."""
+        cache_file = self.cache_dir / f"{cache_key}.json"
+        if cache_file.exists():
+            try:
+                with open(cache_file, encoding="utf-8") as f:
+                    data = json.load(f)
+                logger.info("llm_cache_hit", cache_key=cache_key[:8])
+                return data.get("response")
+            except Exception as e:
+                logger.warning("llm_cache_read_error", error=str(e))
+                return None
+        return None
+
+    def set(self, cache_key: str, response: str) -> None:
+        """Store response in cache."""
+        cache_file = self.cache_dir / f"{cache_key}.json"
+        try:
+            with open(cache_file, "w", encoding="utf-8") as f:
+                json.dump({"response": response}, f)
+            logger.info("llm_cache_saved", cache_key=cache_key[:8])
+        except Exception as e:
+            logger.warning("llm_cache_write_error", error=str(e))
+
+
 class GroqClient:
-    """Wrapper around Groq API client with retry and audit logging."""
+    """Wrapper around Groq API client with retry logic and caching."""
 
     def __init__(
         self,
         api_key: str,
         model: str = "llama-3.3-70b-versatile",
         max_retries: int = 3,
+        enable_cache: bool = True,
     ):
         """
         Initialize Groq client.
@@ -26,10 +67,12 @@ class GroqClient:
             api_key: Groq API key
             model: Model name (default: llama-3.3-70b-versatile)
             max_retries: Maximum number of retries on rate limit
+            enable_cache: Enable response caching to reduce API calls
         """
         self.client = Groq(api_key=api_key)
         self.model = model
         self.max_retries = max_retries
+        self.cache = LLMCache() if enable_cache else None
 
     def hash_prompt(self, prompt: str) -> str:
         """
@@ -53,7 +96,7 @@ class GroqClient:
         json_mode: bool = False,
     ) -> str:
         """
-        Call Groq API with automatic retry on rate limit.
+        Call Groq API with automatic retry on rate limit and response caching.
 
         Args:
             prompt: User prompt
@@ -68,6 +111,20 @@ class GroqClient:
         Raises:
             RuntimeError: If all retries fail
         """
+        prompt_hash = self.hash_prompt(prompt)
+
+        # Check cache first
+        if self.cache:
+            cache_key = self.cache.get_cache_key(prompt, system_prompt)
+            cached_response = self.cache.get(cache_key)
+            if cached_response:
+                logger.debug(
+                    "groq_call_cached",
+                    model=self.model,
+                    prompt_hash=prompt_hash,
+                )
+                return cached_response
+
         messages: list[dict[str, str]] = []
 
         if system_prompt:
@@ -75,7 +132,6 @@ class GroqClient:
 
         messages.append({"role": "user", "content": prompt})
 
-        prompt_hash = self.hash_prompt(prompt)
         logger.debug(
             "groq_call_starting",
             model=self.model,
@@ -105,6 +161,11 @@ class GroqClient:
                     response_length=len(result),
                     attempt=attempt + 1,
                 )
+
+                # Cache the response
+                if self.cache:
+                    cache_key = self.cache.get_cache_key(prompt, system_prompt)
+                    self.cache.set(cache_key, result)
 
                 return result
 
@@ -156,8 +217,6 @@ class GroqClient:
             ValueError: If response is not valid JSON
             RuntimeError: If API call fails
         """
-        import json
-
         response_text = self.call(
             prompt,
             system_prompt=system_prompt,
