@@ -123,6 +123,7 @@ def run(
 
         # Phase 4: Quality Gates
         logger.info("cli_quality_gate_starting")
+        quality_report = {}
         try:
             quality_report = run_quality_gate(
                 code_path=output_dir_path / "src",
